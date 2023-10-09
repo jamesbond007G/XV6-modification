@@ -30,6 +30,9 @@ OBJS = \
   $K/plic.o \
   $K/virtio_disk.o
 
+# Add Macros For Scheduling
+
+
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
 #TOOLPREFIX = 
@@ -70,6 +73,13 @@ endif
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
+
+ifndef SCHEDULER
+SCHEDULER := RR
+endif
+
+MACROSCHEDULER = -D$(SCHEDULER)
+CFLAGS += $(MACROSCHEDULER)
 
 LDFLAGS = -z max-page-size=4096
 
@@ -133,6 +143,9 @@ UPROGS=\
 	$U/_wc\
 	$U/_zombie\
 	$U/_schedulertest\
+	$U/_test_1\
+	$U/_test_2\
+	$U/_alarmtest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

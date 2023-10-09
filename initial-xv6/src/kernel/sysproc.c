@@ -5,7 +5,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
-
+extern int getread_count;
 uint64
 sys_exit(void)
 {
@@ -14,7 +14,11 @@ sys_exit(void)
   exit(n);
   return 0; // not reached
 }
-
+uint64
+sys_getreadcount(void)
+{
+  return getread_count;
+}
 uint64
 sys_getpid(void)
 {
@@ -69,7 +73,10 @@ sys_sleep(void)
   release(&tickslock);
   return 0;
 }
-
+// uint64 sys_getreadcount(void)
+// {
+//   return getre
+// }
 uint64
 sys_kill(void)
 {
@@ -107,4 +114,29 @@ sys_waitx(void)
   if (copyout(p->pagetable, addr2, (char *)&rtime, sizeof(int)) < 0)
     return -1;
   return ret;
+}
+extern ptrtotrapframe arr_of_trapframes_storing_past[1000010];
+
+uint64 sys_sigalarm(void)
+{
+  uint64 address_of_handler;
+  uint64 no_of_ticks;
+
+  argaddr(0, &no_of_ticks);
+  argaddr(1, &address_of_handler);
+  // address_of_handler = argc
+  myproc()->no_of_ticks = no_of_ticks;
+  myproc()->handler = address_of_handler;
+  return 0; 
+}
+uint64 sys_sigreturn(void)
+{
+  memmove(myproc()->trapframe,arr_of_trapframes_storing_past[myproc()->pid], PGSIZE);
+  kfree(arr_of_trapframes_storing_past[myproc()->pid]);
+  myproc()->flag_check_handler = 0; 
+  myproc()->passed_ticks =  0; 
+  myproc()->past_trap_frame = 0; 
+  
+  return myproc()->trapframe->a0; 
+  // return 0;
 }

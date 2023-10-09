@@ -91,8 +91,9 @@ enum procstate
   RUNNING,
   ZOMBIE
 };
-
+typedef struct trapframe* ptrtotrapframe;
 // Per-process state
+extern int getread_count; 
 struct proc
 {
   struct spinlock lock;
@@ -119,6 +120,19 @@ struct proc
   uint rtime;                  // How long the process ran for
   uint ctime;                  // When was the process created
   uint etime;                  // When did the process exited
-};
+ 
+  int queue; 
+  int ticks_when_switch; 
+  int wait; 
+ 
+  int no_of_ticks; 
+  uint64 handler; 
+  int passed_ticks; 
+  // ptrtotrapframe tf; 
 
+  ptrtotrapframe past_trap_frame; 
+  int flag_check_handler; 
+  int new_flag ;
+  
+};
 extern struct proc proc[NPROC];

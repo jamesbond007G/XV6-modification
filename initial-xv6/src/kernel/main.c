@@ -5,11 +5,20 @@
 #include "defs.h"
 
 volatile static int started = 0;
-
+int getread_count = 0; 
 // start() jumps here in supervisor mode on all CPUs.
 void
 main()
 {
+  #ifdef MLFQ
+    printf("\nMLFQ\n");
+  #endif
+  #ifdef RR
+  printf("\nRR\n");
+  #endif
+  #ifdef FCFS
+  printf("\nFCFS\n");
+  #endif
   if(cpuid() == 0){
     consoleinit();
     printfinit();

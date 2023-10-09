@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "client.C": "cpp",
+        "types.h": "c",
+        "memlayout.h": "c",
+        "riscv.h": "c",
+        "spinlock.h": "c",
+        "proc.h": "c",
+        "defs.h": "c",
+        "param.h": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false
+}

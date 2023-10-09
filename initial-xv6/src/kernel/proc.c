@@ -108,7 +108,6 @@ static struct proc *
 allocproc(void)
 {
   struct proc *p;
-
   for (p = proc; p < &proc[NPROC]; p++)
   {
     acquire(&p->lock);
@@ -152,6 +151,17 @@ found:
   p->rtime = 0;
   p->etime = 0;
   p->ctime = ticks;
+  p->passed_ticks = 0;
+  p->flag_check_handler = 0;
+  // #ifdef MLFQ
+  p->queue = 0;
+  p->ticks_when_switch = 0;
+  p->wait = 0;
+  // p->no_of_ticks = 0;
+  // p.
+  p->new_flag = 0;
+  // #endif
+  // p./
   return p;
 }
 
@@ -163,6 +173,8 @@ freeproc(struct proc *p)
 {
   if (p->trapframe)
     kfree((void *)p->trapframe);
+  if (p->past_trap_frame)
+    kfree((void *)p->past_trap_frame);
   p->trapframe = 0;
   if (p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
@@ -175,6 +187,9 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->ticks_when_switch = ticks;
+  p->no_of_ticks = 0; 
+  p->passed_ticks = 0; 
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -466,13 +481,26 @@ void scheduler(void)
   c->proc = 0;
   for (;;)
   {
-    // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
+#ifdef FCFS
+    int min_time = __INT_MAX__;
 
     for (p = proc; p < &proc[NPROC]; p++)
     {
       acquire(&p->lock);
-      if (p->state == RUNNABLE)
+
+      if (p->state == RUNNABLE && min_time >= p->ctime)
+      {
+        min_time = p->ctime;
+      }
+      release(&p->lock);
+    }
+    
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+
+      if (p->state == RUNNABLE && min_time >= p->ctime)
       {
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
@@ -487,6 +515,203 @@ void scheduler(void)
       }
       release(&p->lock);
     }
+#endif
+
+#ifdef RR
+    // printf("L\n");
+
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        // Switch to chosen process.  It is the process's job
+        // to release its lock and then reacquire it
+        // before jumping back to us.
+        p->state = RUNNING;
+        c->proc = p;
+        procdump();
+
+        swtch(&c->context, &p->context);
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
+      release(&p->lock);
+    }
+#endif
+#ifdef MLFQ
+    struct proc *highest_priority_process = 0;
+
+    int flag0 = 0;
+    int flag1 = 0;
+    int flag2 = 0;
+    // int flag3 = 0;
+
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->queue == 0 && p->state == RUNNABLE)
+      {
+        highest_priority_process = p;
+        flag0 = 1;
+        release(&p->lock);
+        break;
+      }
+      else
+      {
+        release(&p->lock);
+      }
+    }
+    if (flag0 == 0)
+    {
+      for (p = proc; p < &proc[NPROC]; p++)
+      {
+        acquire(&p->lock);
+
+        if (p->queue == 1 && p->state == RUNNABLE)
+        {
+          highest_priority_process = p;
+          flag1 = 1;
+          release(&p->lock);
+
+          break;
+        }
+        else
+        {
+          release(&p->lock);
+        }
+      }
+      if (flag1 == 0)
+      {
+        for (p = proc; p < &proc[NPROC]; p++)
+        {
+          acquire(&p->lock);
+
+          if (p->queue == 2 && p->state == RUNNABLE)
+          {
+            highest_priority_process = p;
+            flag2 = 1;
+            release(&p->lock);
+
+            break;
+          }
+          else
+          {
+            release(&p->lock);
+          }
+        }
+        if (flag2 == 0)
+        {
+          for (p = proc; p < &proc[NPROC]; p++)
+          {
+            acquire(&p->lock);
+
+            if (p->queue == 3 && p->state == RUNNABLE)
+            {
+              highest_priority_process = p;
+              release(&p->lock);
+
+              // flag3 = 1;
+              break;
+            }
+            else
+            {
+              release(&p->lock);
+            }
+          }
+        }
+      }
+    }
+
+
+    // Switch to chosen process.  It is the process's job
+    // to release its lock and then reacquire it
+    // before jumping back to us.
+    int max_time = 0 ;
+
+    if (highest_priority_process != 0)
+    {
+      int l = highest_priority_process->queue;
+      // int q = high
+      int flag111 = 0;
+
+      for (p = proc; p < &proc[NPROC]; p++)
+      {
+        // acquire(&p->lock);
+        if (p->state == RUNNABLE)
+        {
+          if (p->new_flag == 1)
+          {
+            int m = p->queue;
+            if (l == m)
+            {
+              highest_priority_process = p;
+              flag111 = 1;
+            }
+          }
+        }
+        // release(&p->lock);
+      }
+      if (flag111 == 0)
+      {
+        for (p = proc; p < &proc[NPROC]; p++)
+        {
+          // acquire(&p->lock);
+          if (p->state == RUNNABLE)
+
+          {
+
+            // printf("%d\n", l);
+            int m = p->queue;
+            if (l == m)
+            {
+              if (max_time <= p->wait)
+              {
+                // highest_priority_process = p;
+                max_time = p->wait;
+              }
+            }
+          }
+          // release(&p->lock);
+        }
+        for (p = proc; p < &proc[NPROC]; p++)
+        {
+          // acquire(&p->lock);
+          if (p->state == RUNNABLE)
+
+          {
+            int l = highest_priority_process->queue;
+            // printf("%d\n", l);
+            int m = p->queue;
+            if (l == m)
+            {
+              if (p->wait == max_time)
+              {
+                highest_priority_process = p;
+                break;
+                // max_time = p->wait;
+              }
+            }
+          }
+          // release(&p->lock);
+        }
+      }
+    }
+    if (highest_priority_process != 0)
+    {
+      acquire(&highest_priority_process->lock);
+      highest_priority_process->state = RUNNING;
+
+      highest_priority_process->wait = 0;
+      c->proc = highest_priority_process;
+      // procdump();
+      swtch(&c->context, &highest_priority_process->context);
+      c->proc = 0;
+      release(&highest_priority_process->lock);
+    }
+#endif
   }
 }
 
@@ -679,27 +904,31 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // No lock to avoid wedging a stuck machine further.
 void procdump(void)
 {
-  static char *states[] = {
-      [UNUSED] "unused",
-      [USED] "used",
-      [SLEEPING] "sleep ",
-      [RUNNABLE] "runble",
-      [RUNNING] "run   ",
-      [ZOMBIE] "zombie"};
+  // static char *states[] = {
+  //     [UNUSED] "unused",
+  //     [USED] "used",
+  //     [SLEEPING] "sleep ",
+  //     [RUNNABLE] "runble",
+  //     [RUNNING] "run   ",
+  //     [ZOMBIE] "zombie"};
   struct proc *p;
-  char *state;
+  // char *state;
 
-  printf("\n");
+  // printf("\n");
   for (p = proc; p < &proc[NPROC]; p++)
   {
     if (p->state == UNUSED)
       continue;
-    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-      state = states[p->state];
-    else
-      state = "???";
-    printf("%d %s %s", p->pid, state, p->name);
-    printf("\n");
+    // if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+    //   state = states[p->state];
+    // else
+    //   state = "???";
+    if (p->state == RUNNING)
+    {
+      // printf("%d %s %d %d\n", p->pid, p->name, p->queue, ticks);
+      // printf("%d %d %d", ticks,p->pid,p->queue);
+      // printf("\n");
+    }
   }
 }
 

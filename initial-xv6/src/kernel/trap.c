@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+ptrtotrapframe arr_of_trapframes_storing_past[1000010];
 
 struct spinlock tickslock;
 uint ticks;
@@ -31,6 +32,17 @@ void trapinithart(void)
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
 //
+int min(int a, int b)
+{
+  if (a < b)
+  {
+    return a;
+  }
+  else
+  {
+    return b;
+  }
+}
 void usertrap(void)
 {
   int which_dev = 0;
@@ -66,7 +78,6 @@ void usertrap(void)
   }
   else if ((which_dev = devintr()) != 0)
   {
-    // ok
   }
   else
   {
@@ -80,8 +91,204 @@ void usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   if (which_dev == 2)
-    yield();
+  {
+    printf("%d %d %d\n", ticks, p->pid, p->queue);
 
+    myproc()->passed_ticks++;
+    // printf("Yes %d %d\n", myproc()->passed_ticks, myproc()->no_of_ticks);
+    if (myproc()->passed_ticks % myproc()->no_of_ticks == 0)
+    {
+      if (myproc()->flag_check_handler == 0)
+      {
+        myproc()->flag_check_handler = 1;
+        // myproc()->
+        // myproc()->past_trap_frame = kalloc();
+        arr_of_trapframes_storing_past[myproc()->pid] = kalloc();
+        memmove(arr_of_trapframes_storing_past[myproc()->pid], myproc()->trapframe, PGSIZE);
+        p->trapframe->epc = myproc()->handler;
+      }
+    }
+
+#ifdef RR
+    yield();
+#endif
+#ifdef FCFS
+#endif
+#ifdef MLFQ
+
+    // procdump();
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        p->wait++;
+      }
+      else if (p->state == RUNNING)
+      {
+        p->ticks_when_switch++;
+      }
+      release(&p->lock);
+    }
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        if ((p->wait >= 30) && p->queue > 0)
+        {
+          if (p->pid >= 9)
+          {
+            printf("%d %d %d\n", ticks - 1,p->pid, p->queue);
+            // printf("%d %d %d before promtotion\n", ticks - 1, p->pid, p->queue);
+          }
+
+          p->queue--;
+
+          if (p->pid >= 9)
+          {
+            printf("%d %d %d after promotion\n", ticks, p->pid, p->queue);
+          }
+          p->new_flag = 0;
+          p->ticks_when_switch = 0;
+          p->wait = 0;
+        }
+      }
+      release(&p->lock);
+    }
+    int current_level = myproc()->queue;
+    for (int i = 0; i < current_level; i++)
+    {
+      for (p = proc; p < &proc[NPROC]; p++)
+      {
+        // acquire(&p->lock);
+
+        if (p->state == RUNNABLE && p->queue == i)
+        {
+          // Switch to chosen process.  It is the process's job
+          // to release its lock and then reacquire it
+          // before jumping back to us.
+          // p->state = RUNNING;
+          // c->proc = p;
+          // swtch(&c->context, &p->context);
+          // if (myproc()->queue<3)
+          // {
+          //   myproc()->queue++;
+          // }
+          // release(&p->lock);
+          // printf("pidc = %d %d\n", myproc()->ticks_when_switch, myproc()->pid);
+          myproc()->new_flag = 1;
+          yield();
+
+          // break;
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          // c->proc = 0;
+        }
+        // release(&p->lock);
+      }
+    }
+    int queu_of_myproc = myproc()->queue;
+    // myproc()->ticks_when_switch++;
+    if (queu_of_myproc == 0)
+    {
+      if (myproc()->ticks_when_switch == 1)
+      {
+        // if (myproc()->pid >= 9)
+        // {
+        //   printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+        // }
+        myproc()->queue++;
+        if (myproc()->pid >= 9)
+        {
+          printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+        myproc()->new_flag = 0;
+        yield();
+      }
+      // 1 second
+    }
+    else if (queu_of_myproc == 1)
+    {
+      if (myproc()->ticks_when_switch == 3)
+      {
+        // printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+
+        myproc()->queue++;
+        // printf("%d %d %d\n", ticks, myproc()->pid, myproc()->queue);
+        if (myproc()->pid >= 9)
+        {
+          printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+
+        myproc()->new_flag = 0;
+
+        yield();
+      }
+      // 3 second
+    }
+    else if (queu_of_myproc == 2)
+    {
+      if (myproc()->ticks_when_switch == 9)
+      {
+        // printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+
+        myproc()->queue++;
+        if (myproc()->pid >= 9)
+        {
+          printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+
+        myproc()->new_flag = 0;
+
+        yield();
+      }
+      // 9second
+    }
+    else if (queu_of_myproc == 3)
+    {
+      if (myproc()->ticks_when_switch == 15)
+      {
+
+        myproc()->new_flag = 0;
+        myproc()->wait = 0;
+
+        // myproc()->queue++;
+        myproc()->ticks_when_switch = 0;
+        yield();
+      }
+      // 15 second
+    }
+
+    // yield();
+#endif
+
+    //     int min_time = __INT_MAX__;
+    //     int i_of_process =qwertyuiop[[[[[[[[[poiuytrewqqqqqqqqqqqqqqqqqqqqwertyuiop[[[[[[[[[poiiop[gvbnm,bnm,bnm,.nm,./]]]]]]]]]]]]]]]]]]] -1;
+    //     struct proc *proc1;
+    //     for (int i = 0; i < NPROC; i++)
+    //     {
+    //       proc1 = &proc[i];
+    //       if (proc1->state == RUNNABLE && p->ctime < min_time)
+    //       {
+    //         min_time = p->ctime;
+    //         i_of_process = i;
+    //       }
+    //     }
+    //     if (i_of_process != -1)
+    //     {
+    //       myproc()
+    //     }
+
+    // #endif
+    // yield();
+  }
   usertrapret();
 }
 
@@ -153,8 +360,164 @@ void kerneltrap()
 
   // give up the CPU if this is a timer interrupt.
   if (which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING)
+  {
+#ifdef RR
     yield();
+#endif
+#ifdef MLFQ
+    struct proc *p;
+    // procdump();
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        p->wait++;
+      }
+      else if (p->state == RUNNING)
+      {
+        p->ticks_when_switch++;
+      }
+      release(&p->lock);
+    }
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        if ((p->wait >= 30) && p->queue > 0)
+        {
+          if (myproc()->pid >= 9)
+          {
+            // printf("%d %d %d\n", ticks-1, myproc()->pid, myproc()->queue);
+            // printf("%d %d %d before promtotion\n", ticks - 1, p->pid, p->queue);
+          }
 
+          p->queue--;
+
+          if (p->pid >= 9)
+          {
+            // printf("%d %d %d after promotion\n", ticks, p->pid, p->queue);
+          }
+          p->new_flag = 0;
+          p->ticks_when_switch = 0;
+          p->wait = 0;
+        }
+      }
+      release(&p->lock);
+    }
+    int current_level = myproc()->queue;
+    for (int i = 0; i < current_level; i++)
+    {
+      for (p = proc; p < &proc[NPROC]; p++)
+      {
+        // acquire(&p->lock);
+
+        if (p->state == RUNNABLE && p->queue == i)
+        {
+          // Switch to chosen process.  It is the process's job
+          // to release its lock and then reacquire it
+          // before jumping back to us.
+          // p->state = RUNNING;
+          // c->proc = p;
+          // swtch(&c->context, &p->context);
+          // if (myproc()->queue<3)
+          // {
+          //   myproc()->queue++;
+          // }
+          // release(&p->lock);
+          // printf("pidc = %d %d\n", myproc()->ticks_when_switch, myproc()->pid);
+          myproc()->new_flag = 1;
+          yield();
+
+          // break;
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          // c->proc = 0;
+        }
+        // release(&p->lock);
+      }
+    }
+    int queu_of_myproc = myproc()->queue;
+    // myproc()->ticks_when_switch++;
+    if (queu_of_myproc == 0)
+    {
+      if (myproc()->ticks_when_switch == 1)
+      {
+
+        // printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+        myproc()->queue++;
+        if (myproc()->pid >= 9)
+        {
+          // printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+        myproc()->new_flag = 0;
+        yield();
+      }
+      // 1 second
+    }
+    else if (queu_of_myproc == 1)
+    {
+      if (myproc()->ticks_when_switch == 3)
+      {
+        // printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+
+        myproc()->queue++;
+        // printf("%d %d %d\n", ticks, myproc()->pid, myproc()->queue);
+        if (myproc()->pid >= 9)
+        {
+          // printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+
+        myproc()->new_flag = 0;
+
+        yield();
+      }
+      // 3 second
+    }
+    else if (queu_of_myproc == 2)
+    {
+      if (myproc()->ticks_when_switch == 9)
+      {
+        // printf("%d %d %d\n", ticks - 1, p->pid, p->queue);
+
+        myproc()->queue++;
+        if (myproc()->pid >= 9)
+        {
+          // printf("%d %d %d after demotion \n", ticks, myproc()->pid, myproc()->queue);
+        }
+        myproc()->ticks_when_switch = 0;
+        myproc()->wait = 0;
+
+        myproc()->new_flag = 0;
+
+        yield();
+      }
+      // 9second
+    }
+    else if (queu_of_myproc == 3)
+    {
+      if (myproc()->ticks_when_switch == 15)
+      {
+
+        myproc()->new_flag = 0;
+        myproc()->wait = 0;
+
+        // myproc()->queue++;
+        myproc()->ticks_when_switch = 0;
+        yield();
+      }
+      // 15 second
+    }
+
+    // yield();
+#endif
+  }
+  // yield
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
   w_sepc(sepc);

@@ -1,0 +1,343 @@
+31 9 0
+31 9 1 after demotion 
+32 10 0
+32 10 1 after demotion 
+33 11 0
+33 11 1 after demotion 
+34 12 0
+34 12 1 after demotion 
+35 13 0
+35 13 1 after demotion 
+36 9 1
+37 9 1
+38 9 1
+38 9 2 after demotion 
+39 10 1
+40 10 1
+41 10 1
+41 10 2 after demotion 
+42 11 1
+43 11 1
+44 11 1
+44 11 2 after demotion 
+45 12 1
+46 12 1
+47 12 1
+47 12 2 after demotion 
+48 13 1
+49 13 1
+50 13 1
+50 13 2 after demotion 
+51 9 2
+52 9 2
+53 9 2
+54 9 2
+55 9 2
+56 9 2
+57 9 2
+58 9 2
+59 9 2
+59 9 3 after demotion 
+60 10 2
+61 10 2
+62 10 2
+63 10 2
+64 10 2
+65 10 2
+66 10 2
+67 10 2
+68 10 2
+68 10 3 after demotion 
+69 11 2
+70 11 2
+71 11 2
+72 11 2
+73 11 2
+74 11 2
+75 11 2
+76 11 2
+77 11 2
+76 12 2 before promtotion
+77 12 1 after promtotion
+78 12 1
+79 12 1
+80 12 1
+79 13 2 before promtotion
+80 13 1 after promtotion
+80 12 2 after demotion 
+81 13 1
+82 13 1
+83 13 1
+83 13 2 after demotion 
+84 11 2
+85 11 2
+86 11 2
+87 11 2
+88 11 2
+89 11 2
+88 9 3 before promtotion
+89 9 2 after promtotion
+90 9 2
+91 9 2
+92 9 2
+93 9 2
+94 9 2
+95 9 2
+96 9 2
+97 9 2
+98 9 2
+97 10 3 before promtotion
+98 10 2 after promtotion
+97 11 2 before promtotion
+98 11 1 after promtotion
+99 11 1
+100 11 1
+101 11 1
+101 11 2 after demotion 
+102 9 2
+103 9 2
+104 9 2
+105 9 2
+106 9 2
+107 9 2
+108 9 2
+109 9 2
+110 9 2
+109 12 2 before promtotion
+110 12 1 after promtotion
+111 12 1
+112 12 1
+113 12 1
+112 13 2 before promtotion
+113 13 1 after promtotion
+113 12 2 after demotion 
+114 13 1
+115 13 1
+116 13 1
+116 13 2 after demotion 
+117 9 2
+118 9 2
+119 9 2
+118 9 2 before promtotion
+119 9 1 after promtotion
+120 9 1
+121 9 1
+122 9 1
+122 9 2 after demotion 
+123 9 2
+124 9 2
+125 9 2
+126 9 2
+127 9 2
+128 9 2
+127 10 2 before promtotion
+128 10 1 after promtotion
+129 10 1
+130 10 1
+131 10 1
+130 11 2 before promtotion
+131 11 1 after promtotion
+131 10 2 after demotion 
+132 11 1
+133 11 1
+134 11 1
+134 11 2 after demotion 
+135 9 2
+136 9 2
+137 9 2
+138 9 2
+139 9 2
+140 9 2
+141 9 2
+142 9 2
+143 9 2
+142 12 2 before promtotion
+143 12 1 after promtotion
+144 12 1
+145 12 1
+146 12 1
+145 13 2 before promtotion
+146 13 1 after promtotion
+146 12 2 after demotion 
+147 13 1
+148 13 1
+149 13 1
+149 13 2 after demotion 
+150 9 2
+151 9 2
+152 9 2
+151 9 2 before promtotion
+152 9 1 after promtotion
+151 3 1 before promtotion
+153 10 2
+154 10 2
+155 10 2
+156 10 2
+157 10 2
+158 10 2
+159 10 2
+160 10 2
+161 10 2
+161 10 3 after demotion 
+162 11 2
+163 11 2
+164 11 2
+165 11 2
+166 11 2
+167 11 2
+168 11 2
+169 11 2
+170 11 2
+170 11 3 after demotion 
+171 12 2
+172 12 2
+173 12 2
+174 12 2
+175 12 2
+176 12 2
+177 12 2
+178 12 2
+179 12 2
+178 13 2 before promtotion
+179 13 1 after promtotion
+180 13 1
+181 13 1
+182 13 1
+182 13 2 after demotion 
+183 12 2
+184 12 2
+185 12 2
+186 12 2
+187 12 2
+188 12 2
+189 12 2
+190 12 2
+191 12 2
+190 10 3 before promtotion
+191 10 2 after promtotion
+192 10 2
+193 10 2
+194 10 2
+195 10 2
+196 10 2
+197 10 2
+198 10 2
+199 10 2
+200 10 2
+199 11 3 before promtotion
+200 11 2 after promtotion
+199 12 2 before promtotion
+200 12 1 after promtotion
+201 12 1
+202 12 1
+203 12 1
+203 12 2 after demotion 
+204 10 2
+205 10 2
+206 10 2
+207 10 2
+208 10 2
+209 10 2
+210 10 2
+211 10 2
+212 10 2
+211 13 2 before promtotion
+212 13 1 after promtotion
+213 13 1
+214 13 1
+215 13 1
+215 13 2 after demotion 
+216 10 2
+217 10 2
+218 10 2
+219 10 2
+220 10 2
+221 10 2
+220 10 2 before promtotion
+221 10 1 after promtotion
+222 10 1
+223 10 1
+224 10 1
+224 10 2 after demotion 
+225 10 2
+226 11 2
+227 11 2
+228 11 2
+229 11 2
+230 11 2
+231 11 2
+232 11 2
+233 11 2
+234 11 2
+234 11 3 after demotion 
+233 12 2 before promtotion
+234 12 1 after promtotion
+235 12 1
+236 12 1
+237 12 1
+237 12 2 after demotion 
+238 12 2
+239 12 2
+240 12 2
+241 12 2
+242 12 2
+243 12 2
+244 12 2
+245 12 2
+246 12 2
+246 12 3 after demotion 
+245 13 2 before promtotion
+246 13 1 after promtotion
+247 13 1
+248 13 1
+249 13 1
+249 13 2 after demotion 
+250 13 2
+251 13 2
+252 13 2
+253 13 2
+254 13 2
+255 13 2
+256 13 2
+257 13 2
+258 13 2
+258 13 3 after demotion 
+259 11 3
+260 11 3
+261 11 3
+262 11 3
+263 11 3
+264 11 3
+265 11 3
+266 11 3
+267 11 3
+268 11 3
+269 12 3
+270 12 3
+271 12 3
+272 12 3
+273 12 3
+274 12 3
+275 12 3
+276 13 3
+277 13 3
+278 13 3
+279 13 3
+280 13 3
+281 13 3
+282 13 3
+283 13 3
+284 13 3
+285 13 3
+286 13 3
+287 13 3
+288 13 3
+289 13 3
+290 13 3
+291 13 3
+292 13 3
+293 13 3
+294 13 3
+295 13 3
+296 13 3
+297 13 3
